@@ -1,15 +1,28 @@
 #!/usr/bin/env python
 import re
 import os
+import codecs
 import sys
 
-subre = re.compile(r'(\w+): 0,(\d+:\d{2}:\d{2})\.\d+,.+,\d+,,(?:\{\\.+\})?([^\r]+)\r?\n')
+subre = re.compile(r'(\w+): 0,(\d+:\d{2}:\d{2})\.\d+,.+,\d+,,(?:\{\\.+\})?([^\r\n]+)\r?\n', re.U)
+
+def readLines(fpath):
+    try:
+        return codecs.open(fpath, 'r', "utf-8").readlines()
+    except UnicodeDecodeError:
+        try:
+            return codecs.open(fpath, 'r', "utf-16").readlines()
+        except UnicodeDecodeError:
+            print "Could not determine encoding of file: "+fpath
+            return
 
 def convertFile(fpath):
-    with open(fpath, "r") as inf:
-        with open(fpath+".txt", "w") as outf:
+    lines = readLines(fpath)
+    if (lines):
+        outpath = fpath+".txt"
+        with codecs.open(outpath, "w", "utf-8") as outf:
             lastLine = None
-            for line in inf:
+            for line in lines:
                 m = subre.match(line)
                 if (m):
                     if (m.group(1) == "Dialogue" and len(m.group(3)) > 0):
@@ -21,7 +34,8 @@ def convertFile(fpath):
                           outf.write(cleanedLine)
                           lastLine = cleanedLine
                     else:
-                        print "Non-dialogue match: "+m.group(1)
+                        print "Non-dialogue match (not yet supported): "+m.group(1)
+            print "Success: "+outpath
 
 for arg in sys.argv[1:]:
     if (os.path.isfile(arg)):
