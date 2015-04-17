@@ -4,7 +4,7 @@ import os
 import codecs
 import sys
 
-subre = re.compile(r'(\w+): 0,(\d+:\d{2}:\d{2})\.\d+,.+,\d+,,(?:\{\\.+\})?([^\r\n]+)\r?\n', re.U)
+subre = re.compile(r'(\w+): 0,(\d+:\d{2}:\d{2})\.\d+,.+,\d+,,(?:\{\\[^\}]+\})?([^\r\n]+)\r?\n', re.U)
 
 def readLines(fpath):
     try:
@@ -28,7 +28,7 @@ def convertFile(fpath):
                     if (m.group(1) == "Dialogue" and len(m.group(3)) > 0):
                         cleanedLine = subre.sub(r'\2 \3\n', line)
                         cleanedLine = re.sub(r'\\N', '', cleanedLine)
-                        cleanedLine = re.sub(r'\{\\.+?\}', '', cleanedLine)
+                        cleanedLine = re.sub(r'\{\\[^\}]+?\}', '', cleanedLine)
                         cleanedLine = re.sub(r'  +', ' -- ', cleanedLine)
                         if (lastLine != cleanedLine):
                           outf.write(cleanedLine)
